@@ -104,6 +104,9 @@ resource "azurerm_linux_virtual_machine" "admin" {
   # CORRECTION Checkov CKV_AZURE_50 : aucune extension installée automatiquement
   allow_extension_operations = false
 
+  # Console série et capture d'écran dans le portail Azure (stockage géré par Azure)
+  boot_diagnostics {}
+
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
@@ -163,6 +166,21 @@ resource "azurerm_lb_rule" "http" {
   disable_outbound_snat          = true
 }
 
+# Sortie Internet des VM du groupe élastique (apt install nginx au démarrage) : elles n'ont pas d'IP
+# publique et la règle ci-dessus coupe la traduction d'adresse implicite, il faut donc une règle sortante
+# explicite (erreur trouvée lors du vrai déploiement : sans elle, nginx ne s'installe pas et la sonde échoue).
+resource "azurerm_lb_outbound_rule" "sortie" {
+  name                     = "sortie-internet"
+  loadbalancer_id          = azurerm_lb.web.id
+  protocol                 = "All"
+  backend_address_pool_id  = azurerm_lb_backend_address_pool.web.id
+  allocated_outbound_ports = 1024
+
+  frontend_ip_configuration {
+    name = "public"
+  }
+}
+
 resource "azurerm_linux_virtual_machine_scale_set" "web" {
   name                = "vmss-${var.prefixe}-web"
   location            = azurerm_resource_group.rg.location
@@ -182,6 +200,9 @@ resource "azurerm_linux_virtual_machine_scale_set" "web" {
 
   # CORRECTION Checkov CKV_AZURE_97 : chiffrement sur l'hôte
   encryption_at_host_enabled = true
+
+  # Console série et capture d'écran dans le portail Azure (stockage géré par Azure)
+  boot_diagnostics {}
 
   source_image_reference {
     publisher = "Canonical"
