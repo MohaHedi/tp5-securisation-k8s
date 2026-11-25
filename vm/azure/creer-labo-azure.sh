@@ -38,9 +38,10 @@ runcmd:
   - git -C /home/eleve/tp5-securisation-k8s -c user.name="Groupe TP5" -c user.email=groupe-tp5@users.noreply.github.com commit -qm "Projet TP 5"
   - chown -R eleve:eleve /home/eleve/tp5-securisation-k8s
   - bash /home/eleve/tp5-securisation-k8s/vm/installer-outils.sh
-  - printf 'VM Azure du TP 5 : connexion par cle SSH uniquement (ssh eleve@<IP publique>)\n\n' > /etc/issue
+  - [sh, -c, "printf 'VM Azure du TP 5 - connexion par cle SSH uniquement (ssh eleve@IP)\\n\\n' > /etc/issue"]
 EOF
 if LC_ALL=C grep -q '[^ -~]' "$TMP/user-data"; then echo "La configuration doit rester en ASCII"; exit 1; fi
+if command -v cloud-init >/dev/null; then cloud-init schema -c "$TMP/user-data" || exit 1; fi
 taille=$(base64 -w0 "$TMP/user-data" | wc -c)
 echo "    configuration : $taille octets encodés (limite Azure : 65 536)"
 [ "$taille" -le 65536 ] || { echo "Configuration trop grande pour Azure"; exit 1; }
