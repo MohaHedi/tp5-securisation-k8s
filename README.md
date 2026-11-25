@@ -28,6 +28,14 @@ Docker, minikube, kubectl, ainsi que Trivy, Checkov (`pip install checkov`) et G
 
 ## Rejouer le labo
 
+Tout d'un coup, avec un rapport des 35 vérifications dans `~/rapport-labo/` (page web, résumé et détail de chaque commande) :
+
+```bash
+./scripts/labo-complet.sh
+```
+
+Ou étape par étape :
+
 ```bash
 ./scripts/demarrer-labo.sh                       # cluster + Calico + audit
 kubectl apply -f k8s/00-namespace.yaml           # namespace protégé (Pod Security "restricted")
@@ -52,6 +60,17 @@ kubectl exec -n boutique pirate -- pg_isready -h database -p 5432 -t 3          
 ./scripts/controles-securite.sh avant                     # le pipeline BLOQUE la version de départ
 ./scripts/controles-securite.sh                           # le pipeline ACCEPTE la version corrigée
 ```
+
+## Machine virtuelle VMware
+
+Le dossier `vm/` fabrique une VM Ubuntu 24.04 qui monte tout le labo seule au premier démarrage
+(cloud-init), puis expose le site de la boutique (port 8080) et le rapport des tests (port 8081).
+
+```bash
+./vm/construire-vm.sh        # → vm/sortie/TP5-Labo-K8s.zip (vmx + vmdk + seed-cidata.iso)
+```
+
+Mode d'emploi côté PC : `vm/LISEZMOI-VMware.txt`.
 
 ## Pipeline
 

@@ -9,10 +9,15 @@ CONF=cluster/encryption-config.yaml        # ignoré par Git (.gitignore)
 CIBLE=/etc/kubernetes/enc/encryption-config.yaml
 MANIFESTE=/etc/kubernetes/manifests/kube-apiserver.yaml
 
-echo "1/4 Génération d'une clé aléatoire de 32 octets"
-CLE=$(head -c 32 /dev/urandom | base64)
-sed "s|<CLE_32_OCTETS_EN_BASE64_GENEREE_PAR_LE_SCRIPT>|${CLE}|" cluster/encryption-config.exemple.yaml > "$CONF"
-chmod 600 "$CONF"
+if [ -s "$CONF" ]; then
+  # Ne JAMAIS remplacer une clé existante : les Secrets déjà chiffrés deviendraient illisibles
+  echo "1/4 Clé déjà présente dans $CONF : on la réutilise"
+else
+  echo "1/4 Génération d'une clé aléatoire de 32 octets"
+  CLE=$(head -c 32 /dev/urandom | base64)
+  sed "s|<CLE_32_OCTETS_EN_BASE64_GENEREE_PAR_LE_SCRIPT>|${CLE}|" cluster/encryption-config.exemple.yaml > "$CONF"
+  chmod 600 "$CONF"
+fi
 
 echo "2/4 Copie de la configuration dans le nœud minikube"
 minikube ssh -- "sudo mkdir -p /etc/kubernetes/enc && sudo chmod 700 /etc/kubernetes/enc"
@@ -20,11 +25,11 @@ minikube cp "$CONF" "minikube:${CIBLE}"
 minikube ssh -- "sudo chmod 600 ${CIBLE}"
 
 echo "3/4 Ajout du paramètre, du volume et du point de montage dans l'API Server"
-# Sauvegarde HORS du dossier manifests : le kubelet lance tous les fichiers qui s'y trouvent !
-minikube ssh -- "sudo cp ${MANIFESTE} /root/kube-apiserver.yaml.sauvegarde"
 if minikube ssh -- "sudo grep -q encryption-provider-config ${MANIFESTE}" >/dev/null 2>&1; then
   echo "Déjà activé."; exit 0
 fi
+# Sauvegarde HORS du dossier manifests : le kubelet lance tous les fichiers qui s'y trouvent !
+minikube ssh -- "sudo cp ${MANIFESTE} /root/kube-apiserver.yaml.sauvegarde"
 minikube ssh -- "sudo sed -i \
   -e '/^    - kube-apiserver\$/a\\    - --encryption-provider-config=${CIBLE}' \
   -e '/^    volumeMounts:\$/a\\    - mountPath: /etc/kubernetes/enc\\n      name: enc\\n      readOnly: true' \

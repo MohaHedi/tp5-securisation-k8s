@@ -1,0 +1,53 @@
+#cloud-config
+# Configuration automatique de la VM du TP 5, lue au 1er démarrage depuis le CD « CIDATA ».
+# cloud-init crée le compte, installe les paquets, puis lance vm/installer-outils.sh
+# qui installe les outils du labo et le service qui monte tout le labo.
+
+hostname: labo-tp5
+locale: fr_FR.UTF-8
+timezone: Europe/Paris
+keyboard:
+  layout: fr
+
+# Identifiant « eleve », mot de passe initial « kubernetes » : ces lettres sont au même endroit
+# en AZERTY et en QWERTY. Le mot de passe doit être changé à la 1re connexion (expire: true).
+users:
+  - name: eleve
+    gecos: Eleve TP5
+    groups: [sudo]
+    shell: /bin/bash
+    lock_passwd: false
+chpasswd:
+  expire: true
+  users:
+    - name: eleve
+      type: hash
+      password: $6$98090c128ba06b76$uwU7qsfDEfEdP1BOD02M0ZFqhB5qbn/wRqVLLye0IKFiDEeMv7gwkgsq9djuIECIc6Gm3H0opUCOwlNnmxuAS1
+ssh_pwauth: true
+
+package_update: true
+packages:
+  - docker.io
+  - docker-buildx
+  - jq
+  - git
+  - pipx
+  - unzip
+  - binutils
+  - open-vm-tools
+
+write_files:
+  # Miroir Google de Docker Hub : évite la limite de téléchargements anonymes de Docker Hub
+  - path: /etc/docker/daemon.json
+    content: |
+      {"registry-mirrors": ["https://mirror.gcr.io"]}
+
+runcmd:
+  - mkdir -p /mnt/cidata
+  - mount -o ro LABEL=CIDATA /mnt/cidata
+  - tar -xzf /mnt/cidata/tp5-securisation-k8s.tar.gz -C /home/eleve
+  - chown -R eleve:eleve /home/eleve/tp5-securisation-k8s
+  - umount /mnt/cidata
+  - bash /home/eleve/tp5-securisation-k8s/vm/installer-outils.sh
+
+final_message: "TP 5 : installation terminée en $UPTIME secondes, le labo se monte maintenant (service labo-tp5)"

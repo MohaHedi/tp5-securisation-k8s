@@ -22,3 +22,6 @@ rapports/avant/trivy-backend.json
 
 # Archive à télécharger (non versionnée)
 livrables/
+
+# VM VMware fabriquée par vm/construire-vm.sh (trop lourde pour Git)
+vm/sortie/

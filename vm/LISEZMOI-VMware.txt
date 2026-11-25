@@ -1,0 +1,79 @@
+VM DU TP 5 « SÉCURISATION DE KUBERNETES » POUR VMWARE
+=====================================================
+
+Contenu du dossier
+------------------
+  TP5-Labo-K8s.vmx     la machine virtuelle (4 processeurs, 8 Go de mémoire, réseau NAT)
+  TP5-Labo-K8s.vmdk    le disque : Ubuntu 24.04 officiel, 40 Go (il grandit au fur et à mesure)
+  seed-cidata.iso      le CD de configuration : il installe et monte tout le labo au 1er démarrage
+
+Ce qu'il faut sur le PC
+-----------------------
+  - VMware Workstation Pro 17 (gratuit), Workstation Player ou VMware Fusion (Mac Intel)
+  - 8 Go de mémoire libres pour la VM (16 Go dans le PC) et 15 Go d'espace disque
+  - Internet : au 1er démarrage la VM télécharge les outils et les images (environ 3 Go)
+  - La virtualisation activée dans le BIOS du PC (Intel VT-x / AMD-V)
+
+Lancer la VM
+------------
+  1. Dézipper l'archive dans un dossier qui restera en place (ex. Documents\Virtual Machines).
+  2. VMware Workstation › Fichier › Ouvrir… › choisir TP5-Labo-K8s.vmx
+  3. Cliquer sur « Démarrer cette machine virtuelle ».
+     Si VMware demande « Avez-vous déplacé ou copié cette VM ? » → « Je l'ai copiée ».
+     S'il propose de mettre à niveau la VM ou d'installer VMware Tools → refuser (déjà inclus).
+  4. Attendre l'écran de connexion (1 à 2 min). Il affiche l'adresse IP de la VM.
+  5. Se connecter :   identifiant  eleve      mot de passe  kubernetes
+     Ubuntu demande tout de suite de changer le mot de passe :
+     retaper « kubernetes », puis deux fois le nouveau mot de passe.
+
+Pendant les 20 à 40 premières minutes
+-------------------------------------
+  La VM installe Docker, minikube, kubectl, Trivy, Checkov, Gitleaks et Terraform, puis
+  monte TOUT le labo et attaque chaque protection pour vérifier qu'elle tient.
+  Suivre en direct :   tail -f ~/rapport-labo/journal.txt      (Ctrl+C pour quitter)
+  Installation des outils seulement : sudo tail -f /var/log/tp5-installation.log
+
+Voir le résultat
+----------------
+  À la connexion, un message résume l'état du labo et donne les adresses. Depuis le
+  navigateur du PC (remplacer 192.168.x.x par l'adresse IP de la VM) :
+    http://192.168.x.x:8080   le site de la boutique (TP 1), protégé par le TP 5
+    http://192.168.x.x:8081   le rapport : chaque test, la commande lancée et son résultat
+  Dans la VM :
+    cat ~/rapport-labo/rapport.txt            résumé des vérifications
+    cd ~/tp5-securisation-k8s                 le projet complet (scripts, YAML, Terraform)
+    kubectl get pods -n boutique              l'application
+    ./scripts/labo-complet.sh                 tout refaire depuis zéro (10 à 15 min)
+
+Se connecter en SSH (plus confortable pour copier-coller)
+---------------------------------------------------------
+  Depuis PowerShell sur le PC :   ssh eleve@192.168.x.x
+
+Redémarrage et arrêt
+--------------------
+  Arrêter proprement :  sudo poweroff        (ou VM › Alimentation › Arrêter l'invité)
+  Au démarrage suivant, le cluster redémarre tout seul en quelques minutes, sans tout refaire.
+
+Problèmes possibles
+-------------------
+  « This host supports Intel VT-x, but Intel VT-x is disabled »
+      → activer la virtualisation dans le BIOS du PC.
+  Windows avec Hyper-V, WSL 2 ou Docker Desktop : VMware fonctionne mais plus lentement.
+  « Not enough physical memory » → VM › Paramètres › Mémoire : 6 Go minimum.
+  Pas d'adresse IP sur l'écran de connexion → VM › Paramètres › Carte réseau : « NAT ».
+  Le clavier tape des Q à la place des A → le clavier est réglé en AZERTY français ; pour
+      un autre clavier :  sudo dpkg-reconfigure keyboard-configuration
+      (l'identifiant et le mot de passe initial s'écrivent pareil en AZERTY et en QWERTY).
+  Le labo indique « LABO INTERROMPU » (souvent une coupure Internet) :
+      ~/rapport-labo/details.txt montre la commande en échec ; relancer avec
+      sudo systemctl restart labo-tp5      ou      ./scripts/labo-complet.sh
+
+Bon à savoir
+------------
+  - Le CD seed-cidata.iso ne sert qu'au 1er démarrage. Ne pas le retirer avant la fin du
+    montage du labo ; ensuite on peut le déconnecter.
+  - Le mot de passe initial est écrit ici et sur l'écran de connexion : c'est un labo.
+    Il est changé dès la 1re connexion, et le compte n'est joignable que depuis le PC (NAT).
+  - Le déploiement Azure du TP 2 (VM + groupe de VM élastique) n'est pas lancé dans cette
+    VM : il faut un compte Azure et c'est payant. La VM vérifie seulement que le code
+    Terraform est valide et sécurisé (terraform validate, Checkov).

@@ -2,6 +2,7 @@
 # Démarre le cluster minikube du TP 5 :
 #   - plugin réseau Calico (indispensable : il applique les Network Policies)
 #   - journaux d'audit de l'API Server activés
+# Taille du cluster réglable : CPUS=2 MEMOIRE=4g ./scripts/demarrer-labo.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -13,9 +14,9 @@ minikube start \
   --driver=docker \
   --kubernetes-version=v1.34.0 \
   --cni=calico \
-  --cpus=4 --memory=8g \
+  --cpus="${CPUS:-4}" --memory="${MEMOIRE:-8g}" \
   --extra-config=apiserver.audit-policy-file=/etc/ssl/certs/audit-policy.yaml \
   --extra-config=apiserver.audit-log-path=-
 
-kubectl wait --for=condition=Ready pods --all -n kube-system --timeout=300s
+kubectl wait --for=condition=Ready pods --all -n kube-system --timeout=600s
 kubectl get nodes

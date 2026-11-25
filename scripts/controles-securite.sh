@@ -3,7 +3,7 @@
 #   ./scripts/controles-securite.sh          → contrôle le code actuel (version corrigée)
 #   ./scripts/controles-securite.sh avant    → contrôle la version de départ (dossier avant/)
 # Prérequis : gitleaks, checkov et trivy installés (ou leurs images Docker).
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 MODE=${1:-apres}
 ECHECS=0
 
