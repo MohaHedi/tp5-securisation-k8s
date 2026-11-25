@@ -16,7 +16,7 @@ Ce qu'il faut sur le PC
 
 Lancer la VM
 ------------
-  1. Dézipper l'archive dans un dossier qui restera en place (ex. Documents\Virtual Machines).
+  1. Extraire l'archive (.zip ou .7z, avec 7-Zip) dans un dossier qui restera en place (ex. Documents\Virtual Machines).
   2. VMware Workstation › Fichier › Ouvrir… › choisir TP5-Labo-K8s.vmx
   3. Cliquer sur « Démarrer cette machine virtuelle ».
      Si VMware demande « Avez-vous déplacé ou copié cette VM ? » → « Je l'ai copiée ».
