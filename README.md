@@ -72,6 +72,27 @@ Le dossier `vm/` fabrique une VM Ubuntu 24.04 qui monte tout le labo seule au pr
 
 Mode d'emploi côté PC : `vm/LISEZMOI-VMware.txt`.
 
+## Déploiement réel sur Azure
+
+```bash
+az login
+# TP 2 : VM d'administration + groupe élastique (1 à 3 VM) derrière un load balancer
+cd terraform && cp terraform.tfvars.example terraform.tfvars   # clé SSH publique, votre IP, région, taille
+terraform init && terraform apply
+# TP 5 : la VM du labo, montée automatiquement comme la VM VMware
+./vm/azure/creer-labo-azure.sh 203.0.113.10/32 ~/.ssh/id_ed25519.pub
+```
+
+Abonnement **Azure for Students** : seules 5 régions sont autorisées et, sur notre abonnement, seule
+**Denmark East** proposait des VM de série B ; le quota est de 6 processeurs par région.
+L'arrêt automatique n'existe pas dans cette région : arrêter les VM après usage
+(`az vm deallocate`), et tout supprimer à la fin :
+
+```bash
+terraform -chdir=terraform destroy
+az group delete -n tp5-labo-rg --yes
+```
+
 ## Pipeline
 
 Le fichier `.github/workflows/securite-deploiement.yml` lance 3 contrôles en parallèle, puis attend une approbation humaine avant de déployer. Pour activer l'approbation : **Settings › Environments › New environment** « production » › **Required reviewers**.

@@ -2,3 +2,8 @@
 # Aucune donnée secrète ici : une clé SSH PUBLIQUE et une adresse IP.
 cle_ssh_publique   = "ssh-ed25519 AAAA... votre-cle-publique"
 ip_admin_autorisee = "203.0.113.10/32"
+
+# Facultatif : valeurs utilisées sur un abonnement Azure for Students (régions et tailles limitées)
+# region        = "denmarkeast"
+# taille_vm     = "Standard_B1s"
+# instances_max = 3
