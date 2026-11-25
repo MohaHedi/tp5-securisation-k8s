@@ -13,8 +13,10 @@ ko()    { printf '\033[1;31m  ✘ %s\033[0m\n' "$1"; ECHECS=$((ECHECS + 1)); }
 
 if [ "$MODE" = "avant" ]; then
   SECRETS_CIBLE=avant; K8S=avant/k8s; TF=avant/terraform; IMAGE=boutique-backend:avant
+  DOCKERFILES=(avant/backend/Dockerfile)
 else
   SECRETS_CIBLE=.;     K8S=k8s;       TF=terraform;       IMAGE=boutique-backend:1.0.0
+  DOCKERFILES=(app/backend/Dockerfile app/frontend/Dockerfile)
 fi
 
 etape "1/3 Secrets (Gitleaks) : $SECRETS_CIBLE"
@@ -26,7 +28,7 @@ else
   ko "secrets détectés dans le code"
 fi
 
-etape "2/3 Infrastructure as Code (Checkov) : $K8S + $TF"
+etape "2/3 Infrastructure as Code (Checkov) : $K8S + $TF + Dockerfiles"
 for dossier in "$K8S" "$TF"; do
   resume=$(checkov -d "$dossier" --compact --quiet 2>/dev/null | grep -E '^Passed' | head -1)
   if checkov -d "$dossier" --compact --quiet >/dev/null 2>&1; then
@@ -35,6 +37,14 @@ for dossier in "$K8S" "$TF"; do
     ko "$dossier → $resume"
   fi
 done
+# Comme le pipeline : les Dockerfiles aussi (oubli trouvé par le vrai pipeline GitHub : HEALTHCHECK manquant)
+args=(); for f in "${DOCKERFILES[@]}"; do args+=(-f "$f"); done
+resume=$(checkov "${args[@]}" --framework dockerfile --compact --quiet 2>/dev/null | grep -E '^Passed' | head -1)
+if checkov "${args[@]}" --framework dockerfile --compact --quiet >/dev/null 2>&1; then
+  ok "Dockerfiles → $resume"
+else
+  ko "Dockerfiles → $resume"
+fi
 
 etape "3/3 Image Docker (Trivy) : $IMAGE"
 if trivy image --quiet --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$IMAGE" >/dev/null 2>&1; then
