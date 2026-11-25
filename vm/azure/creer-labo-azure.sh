@@ -68,6 +68,9 @@ if ! az vm auto-shutdown -g "$RG" -n "$VM" --time 1800 -o none 2>/dev/null; then
 fi
 
 IP=$(az vm show -d -g "$RG" -n "$VM" --query publicIps -o tsv)
+# Le message de connexion de la VM affiche cette IP publique (la VM ne voit que son IP privée)
+az vm run-command invoke -g "$RG" -n "$VM" --command-id RunShellScript \
+  --scripts "mkdir -p /var/lib/tp5 && echo $IP > /var/lib/tp5/ip-publique" -o none
 cat <<EOF
 
 VM créée : $IP

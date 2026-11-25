@@ -44,6 +44,8 @@ cat > /etc/update-motd.d/90-tp5 <<EOF
 #!/bin/sh
 R=$RAPPORT
 IP=\$(hostname -I | awk '{print \$1}')
+# Sur Azure, l'adresse utile depuis le PC est l'IP publique, écrite là par vm/azure/creer-labo-azure.sh
+[ -s $ETAT/ip-publique ] && IP=\$(cat $ETAT/ip-publique)
 echo
 echo "  ── TP 5 · Labo Kubernetes sécurisé ──────────────────────────────"
 if [ -f \$R/.termine ]; then
