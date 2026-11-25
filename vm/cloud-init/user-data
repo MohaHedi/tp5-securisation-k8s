@@ -25,16 +25,8 @@ chpasswd:
       password: $6$98090c128ba06b76$uwU7qsfDEfEdP1BOD02M0ZFqhB5qbn/wRqVLLye0IKFiDEeMv7gwkgsq9djuIECIc6Gm3H0opUCOwlNnmxuAS1
 ssh_pwauth: true
 
-package_update: true
-packages:
-  - docker.io
-  - docker-buildx
-  - jq
-  - git
-  - pipx
-  - unzip
-  - binutils
-  - open-vm-tools
+# Les paquets (Docker, jq, git, pipx, VMware Tools…) sont installés par vm/installer-outils.sh,
+# avec de nouvelles tentatives si Internet coupe.
 
 write_files:
   # Miroir Google de Docker Hub : évite la limite de téléchargements anonymes de Docker Hub

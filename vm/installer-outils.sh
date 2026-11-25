@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
-# Lancé UNE fois par cloud-init (en root) au 1er démarrage de la VM :
-#   1) installe les outils du labo, en versions figées et vérifiées (empreinte SHA-256)
+# Lancé par cloud-init (en root) au 1er démarrage de la VM :
+#   1) installe les paquets et les outils du labo, en versions figées et vérifiées (empreinte SHA-256)
 #   2) installe les services : montage du labo, site de la boutique (:8080), rapport (:8081)
 #   3) affiche l'état du labo à la connexion
 # Journal : /var/log/tp5-installation.log
+# En cas d'échec (coupure Internet…), on peut le relancer sans risque :
+#   sudo bash ~/tp5-securisation-k8s/vm/installer-outils.sh
 set -euo pipefail
 exec > >(tee -a /var/log/tp5-installation.log) 2>&1
+ETAT=/var/lib/tp5
+mkdir -p "$ETAT"
+rm -f "$ETAT/outils-installes" "$ETAT/echec"
+trap 'touch "$ETAT/echec"; echo; echo "!!! ÉCHEC de l installation (ligne $LINENO). Relancer : sudo bash $0"' ERR
 
 ELEVE=eleve
 PROJET=/home/$ELEVE/tp5-securisation-k8s
@@ -26,6 +32,52 @@ telecharger() {
   curl -fsSL --retry 5 "$1" -o "$2"
   echo "$attendu  $2" | sha256sum -c -
 }
+
+etape "Message d'accueil (écran de connexion et après connexion)"
+cat > /etc/issue <<'EOF'
+Ubuntu 24.04 · VM du TP 5 « Sécurisation de Kubernetes »   (\n, \l)
+  Adresse IP : \4
+  Identifiant : eleve   ·   mot de passe initial : kubernetes (à changer à la 1re connexion)
+
+EOF
+cat > /etc/update-motd.d/90-tp5 <<EOF
+#!/bin/sh
+R=$RAPPORT
+IP=\$(hostname -I | awk '{print \$1}')
+echo
+echo "  ── TP 5 · Labo Kubernetes sécurisé ──────────────────────────────"
+if [ -f \$R/.termine ]; then
+  echo "  Labo prêt depuis le \$(cat \$R/.termine)"
+  echo "  \$(sed -n 2p \$R/rapport.txt)"
+  echo "  Depuis le navigateur du PC :"
+  echo "    site de la boutique : http://\$IP:8080"
+  echo "    rapport des tests   : http://\$IP:8081"
+  echo "  Dans ce terminal : cat ~/rapport-labo/rapport.txt   ·   cd ~/tp5-securisation-k8s"
+elif [ -f $ETAT/outils-installes ]; then
+  echo "  Le labo se monte tout seul (20 à 40 min au 1er démarrage)."
+  echo "  Suivre en direct : tail -f ~/rapport-labo/journal.txt"
+elif [ -f $ETAT/echec ]; then
+  echo "  L'installation des outils a ÉCHOUÉ (souvent : pas d'Internet dans la VM)."
+  echo "  Voir : sudo tail -20 /var/log/tp5-installation.log"
+  echo "  Relancer : sudo bash ~/tp5-securisation-k8s/vm/installer-outils.sh"
+else
+  echo "  Installation des outils en cours (environ 10 min)…"
+  echo "  Suivre en direct : sudo tail -f /var/log/tp5-installation.log"
+fi
+echo
+EOF
+chmod 755 /etc/update-motd.d/90-tp5
+chmod -x /etc/update-motd.d/10-help-text /etc/update-motd.d/50-motd-news 2>/dev/null || true
+
+etape "Paquets Ubuntu : Docker, jq, git, pipx, VMware Tools…"
+export DEBIAN_FRONTEND=noninteractive
+for essai in 1 2 3 4 5; do
+  if apt-get update -q && apt-get install -y -q docker.io docker-buildx jq git pipx unzip binutils open-vm-tools; then
+    break
+  fi
+  [ "$essai" -eq 5 ] && false
+  echo "Échec (Internet ?), nouvel essai $((essai + 1))/5 dans 30 s"; sleep 30
+done
 
 etape "Docker : démarrage et accès pour $ELEVE"
 usermod -aG docker "$ELEVE"
@@ -119,38 +171,10 @@ Restart=always
 WantedBy=multi-user.target
 EOF
 
-etape "Message d'accueil (écran de connexion et après connexion)"
-cat > /etc/issue <<'EOF'
-Ubuntu 24.04 · VM du TP 5 « Sécurisation de Kubernetes »   (\n, \l)
-  Adresse IP : \4
-  Identifiant : eleve   ·   mot de passe initial : kubernetes (à changer à la 1re connexion)
-
-EOF
-cat > /etc/update-motd.d/90-tp5 <<EOF
-#!/bin/sh
-R=$RAPPORT
-IP=\$(hostname -I | awk '{print \$1}')
-echo
-echo "  ── TP 5 · Labo Kubernetes sécurisé ──────────────────────────────"
-if [ -f \$R/.termine ]; then
-  echo "  Labo prêt depuis le \$(cat \$R/.termine)"
-  echo "  \$(head -2 \$R/rapport.txt | tail -1)"
-  echo "  Depuis le navigateur du PC :"
-  echo "    site de la boutique : http://\$IP:8080"
-  echo "    rapport des tests   : http://\$IP:8081"
-  echo "  Dans ce terminal : cat ~/rapport-labo/rapport.txt   ·   cd ~/tp5-securisation-k8s"
-else
-  echo "  Le labo se monte tout seul (20 à 40 min au 1er démarrage)."
-  echo "  Suivre en direct : tail -f ~/rapport-labo/journal.txt"
-fi
-echo
-EOF
-chmod 755 /etc/update-motd.d/90-tp5
-chmod -x /etc/update-motd.d/10-help-text /etc/update-motd.d/50-motd-news 2>/dev/null || true
-
 etape "Activation et démarrage du montage du labo (en arrière-plan)"
 systemctl daemon-reload
 systemctl enable labo-tp5.service boutique-web.service rapport-web.service
 systemctl start rapport-web.service
 systemctl start --no-block labo-tp5.service boutique-web.service
+touch "$ETAT/outils-installes"
 echo "Installation des outils terminée."

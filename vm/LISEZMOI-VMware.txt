@@ -64,6 +64,9 @@ Problèmes possibles
   Le clavier tape des Q à la place des A → le clavier est réglé en AZERTY français ; pour
       un autre clavier :  sudo dpkg-reconfigure keyboard-configuration
       (l'identifiant et le mot de passe initial s'écrivent pareil en AZERTY et en QWERTY).
+  Le message d'accueil indique « L'installation des outils a ÉCHOUÉ » (pas d'Internet) :
+      vérifier Internet dans la VM :  ping -c 2 ubuntu.com
+      puis relancer :  sudo bash ~/tp5-securisation-k8s/vm/installer-outils.sh
   Le labo indique « LABO INTERROMPU » (souvent une coupure Internet) :
       ~/rapport-labo/details.txt montre la commande en échec ; relancer avec
       sudo systemctl restart labo-tp5      ou      ./scripts/labo-complet.sh
