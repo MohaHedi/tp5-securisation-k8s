@@ -19,3 +19,6 @@ __pycache__/
 
 # Rapports Trivy complets trop volumineux pour Git (le résumé est versionné)
 rapports/avant/trivy-backend.json
+
+# Archive à télécharger (non versionnée)
+livrables/
