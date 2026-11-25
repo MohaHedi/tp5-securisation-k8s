@@ -1,0 +1,41 @@
+# ⚠ VERSION AVANT CORRECTION - VOLONTAIREMENT NON SÉCURISÉE (dossier pédagogique)
+# Problèmes : tag "latest", conteneur privilégié et root, pas de limites de ressources,
+# mot de passe écrit en clair, jeton de l'API monté automatiquement, pas de sondes.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: boutique-backend:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_PASSWORD
+              value: "Bf2026_xK9mQ7vLt3Rz8WpN4cJ"
+          securityContext:
+            privileged: true
+            runAsUser: 0
+            allowPrivilegeEscalation: true
+---
+# Secret "en clair" dans Git : base64 n'est PAS du chiffrement
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-credentials
+  namespace: default
+type: Opaque
+data:
+  username: Ym91dGlxdWU=
+  password: QmYyMDI2X3hLOW1RN3ZMdDNSejhXcE40Y0o=

@@ -1,0 +1,104 @@
+
+Report Summary
+
+┌─────────────────────────────────────────────────────────────────────────────────┬────────────┬─────────────────┐
+│                                     Target                                      │    Type    │ Vulnerabilities │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ boutique-backend:1.0.0 (alpine 3.24.4)                                          │   alpine   │       11        │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.13/site-packages/asn1crypto-1.5.1.dist-info/METADATA      │ python-pkg │        0        │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.13/site-packages/blinker-1.9.0.dist-info/METADATA         │ python-pkg │        0        │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.13/site-packages/click-8.5.1.dist-info/METADATA           │ python-pkg │        0        │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.13/site-packages/flask-3.1.2.dist-info/METADATA           │ python-pkg │        1        │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.13/site-packages/gunicorn-23.0.0.dist-info/METADATA       │ python-pkg │        0        │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.13/site-packages/itsdangerous-2.2.0.dist-info/METADATA    │ python-pkg │        0        │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.13/site-packages/jinja2-3.1.6.dist-info/METADATA          │ python-pkg │        0        │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.13/site-packages/markupsafe-3.0.4.dist-info/METADATA      │ python-pkg │        0        │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.13/site-packages/packaging-26.4.dist-info/METADATA        │ python-pkg │        0        │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.13/site-packages/pg8000-1.31.5.dist-info/METADATA         │ python-pkg │        0        │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.13/site-packages/python_dateutil-4.0.0.dist-info/METADATA │ python-pkg │        0        │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.13/site-packages/scramp-1.5.0.dist-info/METADATA          │ python-pkg │        0        │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.13/site-packages/tzdata-2026.6.dist-info/METADATA         │ python-pkg │        0        │
+├─────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┤
+│ usr/local/lib/python3.13/site-packages/werkzeug-3.1.9.dist-info/METADATA        │ python-pkg │        0        │
+└─────────────────────────────────────────────────────────────────────────────────┴────────────┴─────────────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+
+boutique-backend:1.0.0 (alpine 3.24.4)
+======================================
+Total: 11 (UNKNOWN: 0, LOW: 4, MEDIUM: 7, HIGH: 0, CRITICAL: 0)
+
+┌────────────┬─────────────────┬──────────┬────────┬───────────────────┬───────────────┬────────────────────────────────────────────────────────────┐
+│  Library   │  Vulnerability  │ Severity │ Status │ Installed Version │ Fixed Version │                           Title                            │
+├────────────┼─────────────────┼──────────┼────────┼───────────────────┼───────────────┼────────────────────────────────────────────────────────────┤
+│ libcrypto3 │ CVE-2026-107496 │ MEDIUM   │ fixed  │ 3.5.9-r0          │ 3.5.9-r1      │ openssl: openssl: Denial of Service via crafted EC         │
+│            │                 │          │        │                   │               │ certificate in CMS encryption...                           │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-107496                │
+│            ├─────────────────┤          │        │                   │               ├────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-95691  │          │        │                   │               │ openssl: openssl: Denial of Service via overlapping QUIC   │
+│            │                 │          │        │                   │               │ CRYPTO frame processing                                    │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-95691                 │
+│            ├─────────────────┤          │        │                   │               ├────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-95692  │          │        │                   │               │ openssl: OpenSSL: Denial of Service via out-of-bounds read │
+│            │                 │          │        │                   │               │ in AES-GCM-SIV                                             │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-95692                 │
+│            ├─────────────────┼──────────┤        │                   │               ├────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-88822  │ LOW      │        │                   │               │ openssl: openssl: Information disclosure via uninitialized │
+│            │                 │          │        │                   │               │ memory in QUIC peer detection                              │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-88822                 │
+│            ├─────────────────┤          │        │                   │               ├────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-88823  │          │        │                   │               │ openssl: OpenSSL: Message authentication bypass via        │
+│            │                 │          │        │                   │               │ zero-length AAD update                                     │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-88823                 │
+├────────────┼─────────────────┼──────────┤        │                   │               ├────────────────────────────────────────────────────────────┤
+│ libssl3    │ CVE-2026-107496 │ MEDIUM   │        │                   │               │ openssl: openssl: Denial of Service via crafted EC         │
+│            │                 │          │        │                   │               │ certificate in CMS encryption...                           │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-107496                │
+│            ├─────────────────┤          │        │                   │               ├────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-95691  │          │        │                   │               │ openssl: openssl: Denial of Service via overlapping QUIC   │
+│            │                 │          │        │                   │               │ CRYPTO frame processing                                    │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-95691                 │
+│            ├─────────────────┤          │        │                   │               ├────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-95692  │          │        │                   │               │ openssl: OpenSSL: Denial of Service via out-of-bounds read │
+│            │                 │          │        │                   │               │ in AES-GCM-SIV                                             │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-95692                 │
+│            ├─────────────────┼──────────┤        │                   │               ├────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-88822  │ LOW      │        │                   │               │ openssl: openssl: Information disclosure via uninitialized │
+│            │                 │          │        │                   │               │ memory in QUIC peer detection                              │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-88822                 │
+│            ├─────────────────┤          │        │                   │               ├────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-88823  │          │        │                   │               │ openssl: OpenSSL: Message authentication bypass via        │
+│            │                 │          │        │                   │               │ zero-length AAD update                                     │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-88823                 │
+├────────────┼─────────────────┼──────────┤        ├───────────────────┼───────────────┼────────────────────────────────────────────────────────────┤
+│ zlib       │ CVE-2026-4738   │ MEDIUM   │        │ 1.3.2-r1          │ 1.4-r0        │ Improper Restriction of Operations within the Bounds of a  │
+│            │                 │          │        │                   │               │ Memory Buffe ......                                        │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-4738                  │
+└────────────┴─────────────────┴──────────┴────────┴───────────────────┴───────────────┴────────────────────────────────────────────────────────────┘
+
+Python (python-pkg)
+===================
+Total: 1 (UNKNOWN: 0, LOW: 1, MEDIUM: 0, HIGH: 0, CRITICAL: 0)
+
+┌──────────────────┬────────────────┬──────────┬────────┬───────────────────┬───────────────┬──────────────────────────────────────────────────────────────┐
+│     Library      │ Vulnerability  │ Severity │ Status │ Installed Version │ Fixed Version │                            Title                             │
+├──────────────────┼────────────────┼──────────┼────────┼───────────────────┼───────────────┼──────────────────────────────────────────────────────────────┤
+│ Flask (METADATA) │ CVE-2026-27205 │ LOW      │ fixed  │ 3.1.2             │ 3.1.3         │ flask: Flask: Information disclosure via improper caching of │
+│                  │                │          │        │                   │               │ session data                                                 │
+│                  │                │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-27205                   │
+└──────────────────┴────────────────┴──────────┴────────┴───────────────────┴───────────────┴──────────────────────────────────────────────────────────────┘

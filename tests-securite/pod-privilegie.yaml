@@ -1,0 +1,14 @@
+# TEST : un Pod "privilégié" (accès total à la machine hôte).
+# Résultat attendu dans le namespace boutique : REFUSÉ par les Pod Security Standards.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-privilegie
+  namespace: boutique
+spec:
+  containers:
+    - name: pirate
+      image: busybox:1.37
+      command: ["sleep", "3600"]
+      securityContext:
+        privileged: true

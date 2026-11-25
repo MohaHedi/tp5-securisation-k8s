@@ -1,0 +1,139 @@
+# Pipeline de sécurité du TP 5
+#
+#   1. Secrets   (Gitleaks) ─┐
+#   2. IaC       (Checkov)  ─┼──► 4. Approbation humaine ──► Déploiement
+#   3. Image     (Trivy)    ─┘
+#
+# Si UN SEUL contrôle échoue, le déploiement n'a pas lieu.
+# L'approbation se règle dans GitHub : Settings > Environments > production > Required reviewers.
+
+name: Sécurité et déploiement
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Moindre privilège aussi pour le pipeline : lecture seule par défaut
+permissions:
+  contents: read
+
+concurrency:
+  group: securite-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GITLEAKS_VERSION: v8.30.1
+  CHECKOV_VERSION: 3.4.11
+  TRIVY_VERSION: 0.76.2
+
+jobs:
+  secrets:
+    name: 1. Scan des secrets (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # tout l'historique : un secret effacé reste dans les anciens commits
+      - name: Recherche de secrets dans tout l'historique Git
+        run: |
+          docker run --rm -v "$PWD:/repo" -w /repo \
+            zricethezav/gitleaks:${GITLEAKS_VERSION} \
+            git --no-banner --redact --verbose --config .gitleaks.toml .
+
+  iac:
+    name: 2. Analyse IaC (Checkov)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Installation de Checkov
+        run: pip install "checkov==${CHECKOV_VERSION}"
+      - name: Manifestes Kubernetes
+        run: checkov -d k8s --framework kubernetes --compact
+      - name: Terraform (TP 2)
+        run: checkov -d terraform --framework terraform --compact
+      - name: Dockerfiles
+        run: checkov -f app/backend/Dockerfile -f app/frontend/Dockerfile --framework dockerfile --compact
+
+  image:
+    name: 3. Construction et scan des images (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construction des images
+        run: |
+          docker build -t boutique-backend:1.0.0 app/backend
+          docker build -t boutique-frontend:1.0.0 app/frontend
+      - name: Scan Trivy (bloquant sur HIGH et CRITICAL corrigeables)
+        run: |
+          for image in boutique-backend:1.0.0 boutique-frontend:1.0.0; do
+            echo "::group::Scan de $image"
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+              aquasec/trivy:${TRIVY_VERSION} image \
+              --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$image"
+            echo "::endgroup::"
+          done
+      - name: Sauvegarde des images pour le déploiement
+        run: docker save boutique-backend:1.0.0 boutique-frontend:1.0.0 -o images.tar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: images
+          path: images.tar
+          retention-days: 1
+
+  deploy:
+    name: 4. Déploiement (après approbation)
+    needs: [secrets, iac, image]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: production          # ← bloque ici tant qu'un responsable n'a pas approuvé
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: images
+      - name: Cluster Kubernetes de démonstration (kind)
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: boutique
+      - name: Chargement des images dans le cluster
+        run: kind load image-archive images.tar --name boutique
+      - name: Namespace protégé et RBAC
+        run: |
+          kubectl apply -f k8s/00-namespace.yaml
+          kubectl apply -f k8s/10-rbac.yaml
+      - name: Secret généré au hasard (jamais écrit dans Git)
+        run: |
+          kubectl create secret generic db-credentials -n boutique \
+            --from-literal=username=boutique \
+            --from-literal=password="$(openssl rand -base64 24)"
+      - name: Déploiement de l'application
+        run: |
+          kubectl apply -f k8s/
+          kubectl rollout status statefulset/database -n boutique --timeout=180s
+          kubectl rollout status deployment/backend -n boutique --timeout=180s
+          kubectl rollout status deployment/frontend -n boutique --timeout=180s
+      - name: "Test : l'application répond"
+        run: |
+          kubectl port-forward -n boutique svc/frontend 8080:80 &
+          sleep 5
+          curl -sf localhost:8080/api/produits
+      - name: "Test : un Pod privilégié est refusé"
+        run: |
+          if kubectl apply -f tests-securite/pod-privilegie.yaml; then
+            echo "::error::Le Pod privilégié a été accepté !"; exit 1
+          fi
+          echo "Pod privilégié refusé : OK"
+      - name: "Test : le pirate ne joint pas la base (dépend du plugin réseau)"
+        continue-on-error: true
+        run: |
+          kubectl apply -f tests-securite/pod-pirate.yaml
+          kubectl wait --for=condition=Ready pod/pirate -n boutique --timeout=60s
+          if kubectl exec -n boutique pirate -- pg_isready -h database -p 5432 -t 3; then
+            echo "::warning::La base est joignable : le plugin réseau n'applique pas les Network Policies"; exit 1
+          fi
+          echo "Accès à la base bloqué : OK"

@@ -1,0 +1,76 @@
+
+Report Summary
+
+┌─────────────────────────────────────────┬────────┬─────────────────┐
+│                 Target                  │  Type  │ Vulnerabilities │
+├─────────────────────────────────────────┼────────┼─────────────────┤
+│ boutique-frontend:1.0.0 (alpine 3.24.2) │ alpine │       14        │
+└─────────────────────────────────────────┴────────┴─────────────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+
+boutique-frontend:1.0.0 (alpine 3.24.2)
+=======================================
+Total: 14 (UNKNOWN: 0, LOW: 4, MEDIUM: 7, HIGH: 3, CRITICAL: 0)
+
+┌────────────┬─────────────────┬──────────┬────────┬───────────────────┬───────────────┬──────────────────────────────────────────────────────────────┐
+│  Library   │  Vulnerability  │ Severity │ Status │ Installed Version │ Fixed Version │                            Title                             │
+├────────────┼─────────────────┼──────────┼────────┼───────────────────┼───────────────┼──────────────────────────────────────────────────────────────┤
+│ libcrypto3 │ CVE-2026-107496 │ MEDIUM   │ fixed  │ 3.5.9-r0          │ 3.5.9-r1      │ openssl: openssl: Denial of Service via crafted EC           │
+│            │                 │          │        │                   │               │ certificate in CMS encryption...                             │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-107496                  │
+│            ├─────────────────┤          │        │                   │               ├──────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-95691  │          │        │                   │               │ openssl: openssl: Denial of Service via overlapping QUIC     │
+│            │                 │          │        │                   │               │ CRYPTO frame processing                                      │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-95691                   │
+│            ├─────────────────┤          │        │                   │               ├──────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-95692  │          │        │                   │               │ openssl: OpenSSL: Denial of Service via out-of-bounds read   │
+│            │                 │          │        │                   │               │ in AES-GCM-SIV                                               │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-95692                   │
+│            ├─────────────────┼──────────┤        │                   │               ├──────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-88822  │ LOW      │        │                   │               │ openssl: openssl: Information disclosure via uninitialized   │
+│            │                 │          │        │                   │               │ memory in QUIC peer detection                                │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-88822                   │
+│            ├─────────────────┤          │        │                   │               ├──────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-88823  │          │        │                   │               │ openssl: OpenSSL: Message authentication bypass via          │
+│            │                 │          │        │                   │               │ zero-length AAD update                                       │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-88823                   │
+├────────────┼─────────────────┼──────────┤        │                   │               ├──────────────────────────────────────────────────────────────┤
+│ libssl3    │ CVE-2026-107496 │ MEDIUM   │        │                   │               │ openssl: openssl: Denial of Service via crafted EC           │
+│            │                 │          │        │                   │               │ certificate in CMS encryption...                             │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-107496                  │
+│            ├─────────────────┤          │        │                   │               ├──────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-95691  │          │        │                   │               │ openssl: openssl: Denial of Service via overlapping QUIC     │
+│            │                 │          │        │                   │               │ CRYPTO frame processing                                      │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-95691                   │
+│            ├─────────────────┤          │        │                   │               ├──────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-95692  │          │        │                   │               │ openssl: OpenSSL: Denial of Service via out-of-bounds read   │
+│            │                 │          │        │                   │               │ in AES-GCM-SIV                                               │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-95692                   │
+│            ├─────────────────┼──────────┤        │                   │               ├──────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-88822  │ LOW      │        │                   │               │ openssl: openssl: Information disclosure via uninitialized   │
+│            │                 │          │        │                   │               │ memory in QUIC peer detection                                │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-88822                   │
+│            ├─────────────────┤          │        │                   │               ├──────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-88823  │          │        │                   │               │ openssl: OpenSSL: Message authentication bypass via          │
+│            │                 │          │        │                   │               │ zero-length AAD update                                       │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-88823                   │
+├────────────┼─────────────────┼──────────┤        ├───────────────────┼───────────────┼──────────────────────────────────────────────────────────────┤
+│ musl       │ CVE-2026-107891 │ HIGH     │        │ 1.2.6-r2          │ 1.2.6-r3      │ musl: musl: Arbitrary code execution via integer overflow in │
+│            │                 │          │        │                   │               │ regcomp                                                      │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-107891                  │
+├────────────┤                 │          │        │                   │               │                                                              │
+│ musl-utils │                 │          │        │                   │               │                                                              │
+│            │                 │          │        │                   │               │                                                              │
+│            │                 │          │        │                   │               │                                                              │
+├────────────┼─────────────────┤          │        ├───────────────────┼───────────────┼──────────────────────────────────────────────────────────────┤
+│ zlib       │ CVE-2026-85091  │          │        │ 1.3.2-r0          │ 1.3.2-r1      │ zlib: zlib: Heap buffer overflow in gz_vacate() allows       │
+│            │                 │          │        │                   │               │ arbitrary code execution                                     │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-85091                   │
+│            ├─────────────────┼──────────┤        │                   ├───────────────┼──────────────────────────────────────────────────────────────┤
+│            │ CVE-2026-4738   │ MEDIUM   │        │                   │ 1.4-r0        │ Improper Restriction of Operations within the Bounds of a    │
+│            │                 │          │        │                   │               │ Memory Buffe ......                                          │
+│            │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-4738                    │
+└────────────┴─────────────────┴──────────┴────────┴───────────────────┴───────────────┴──────────────────────────────────────────────────────────────┘

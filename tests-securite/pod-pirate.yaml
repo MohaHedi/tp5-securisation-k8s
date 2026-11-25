@@ -1,0 +1,29 @@
+# TEST : un Pod "pirate" qui respecte les règles de sécurité (il est donc accepté),
+# mais qui n'a AUCUNE autorisation réseau. Il essaie de joindre la base de données.
+# Avant les Network Policies : il y arrive. Après : il est bloqué.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pirate
+  namespace: boutique
+  labels:
+    app: pirate
+spec:
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 70
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: pirate
+      image: postgres:17-alpine          # on utilise juste l'outil pg_isready
+      command: ["sleep", "3600"]
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+      resources:
+        limits:
+          cpu: 100m
+          memory: 64Mi

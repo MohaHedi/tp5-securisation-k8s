@@ -1,0 +1,19 @@
+# Chiffrement des Secrets au repos dans etcd (modèle à copier)
+#
+# Ne versionnez JAMAIS le vrai fichier : il contient la clé de chiffrement.
+# Le script scripts/activer-chiffrement.sh génère la vraie clé et installe ce fichier dans minikube.
+#
+# Ordre des "providers" :
+#   1. secretbox : chiffre tous les NOUVEAUX Secrets avec la clé "cle-tp5"
+#   2. identity  : permet encore de LIRE les anciens Secrets non chiffrés (transition)
+apiVersion: apiserver.config.k8s.io/v1
+kind: EncryptionConfiguration
+resources:
+  - resources:
+      - secrets
+    providers:
+      - secretbox:
+          keys:
+            - name: cle-tp5
+              secret: <CLE_32_OCTETS_EN_BASE64_GENEREE_PAR_LE_SCRIPT>
+      - identity: {}

@@ -1,0 +1,16 @@
+# Namespace de l'application, protégé par les Pod Security Standards (niveau "restricted")
+# enforce : refuse les Pods non conformes
+# audit   : les signale dans les journaux d'audit
+# warn    : affiche un avertissement à l'utilisateur
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: boutique
+  labels:
+    app.kubernetes.io/part-of: boutique
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/audit-version: latest
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn-version: latest

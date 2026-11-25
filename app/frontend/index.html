@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boutique Black Friday</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0E1B2C; color: #F5F3EE; margin: 0; padding: 48px; }
+  h1 { margin: 0 0 8px; }
+  p { color: #B9C6D8; }
+  ul { list-style: none; padding: 0; display: grid; gap: 12px; max-width: 520px; }
+  li { background: #172840; border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; }
+  .prix { color: #F28C38; font-weight: 700; }
+</style>
+</head>
+<body>
+<h1>Boutique Black Friday</h1>
+<p>Application de démonstration du TP 5 : frontend → backend → base PostgreSQL.</p>
+<ul id="produits"><li>Chargement…</li></ul>
+<script>
+fetch('/api/produits').then(r => r.json()).then(liste => {
+  document.getElementById('produits').innerHTML = liste
+    .map(p => `<li><span>${p.nom}</span><span class="prix">${p.prix.toFixed(2)} €</span></li>`).join('');
+}).catch(() => {
+  document.getElementById('produits').innerHTML = '<li>Le backend ne répond pas.</li>';
+});
+</script>
+</body>
+</html>

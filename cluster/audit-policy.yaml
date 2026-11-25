@@ -1,0 +1,33 @@
+# Politique d'audit de l'API Server (TP 5)
+# Idée : enregistrer QUI fait QUOI, sans noyer les journaux sous le bruit du système,
+# et sans jamais écrire le contenu des Secrets dans les journaux.
+apiVersion: audit.k8s.io/v1
+kind: Policy
+omitStages:
+  - "RequestReceived"
+rules:
+  # 1. Bruit inutile : sondes de santé de l'API
+  - level: None
+    nonResourceURLs: ["/healthz*", "/livez*", "/readyz*", "/version", "/openapi*"]
+
+  # 2. Bruit inutile : lectures continues des composants système
+  - level: None
+    userGroups: ["system:nodes", "system:serviceaccounts:kube-system"]
+    verbs: ["get", "list", "watch"]
+  - level: None
+    users: ["system:kube-scheduler", "system:kube-controller-manager", "system:kube-proxy", "system:apiserver"]
+    verbs: ["get", "list", "watch"]
+
+  # 3. Secrets et ConfigMaps : seulement les métadonnées (qui, quand, quoi), jamais le contenu
+  - level: Metadata
+    resources:
+      - group: ""
+        resources: ["secrets", "configmaps"]
+
+  # 4. Modifications dans le namespace de l'application : on garde le corps de la requête
+  - level: Request
+    namespaces: ["boutique"]
+    verbs: ["create", "update", "patch", "delete"]
+
+  # 5. Tout le reste : métadonnées
+  - level: Metadata

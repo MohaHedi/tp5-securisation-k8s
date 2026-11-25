@@ -1,0 +1,12 @@
+# Configuration Gitleaks : on garde toutes les règles par défaut.
+# Seule exception : le dossier "avant/", qui contient des exemples VOLONTAIREMENT vulnérables
+# (faux mots de passe) pour montrer en cours ce que le scan détecte.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Exemples pédagogiques non sécurisés (faux secrets)"
+paths = [
+  '''^avant/''',
+  '''rapports/''',
+]

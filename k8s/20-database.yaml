@@ -1,0 +1,127 @@
+# Base de données PostgreSQL durcie
+# - le mot de passe vient du Secret "db-credentials", monté en FICHIER (pas en variable d'environnement)
+# - utilisateur non-root avec un UID élevé (10070), système de fichiers en lecture seule
+# - pour le TP, les données sont dans un emptyDir ; en production on utiliserait un PersistentVolume
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-init
+  namespace: boutique
+data:
+  init.sql: |
+    CREATE TABLE produits (id SERIAL PRIMARY KEY, nom TEXT NOT NULL, prix NUMERIC(8,2) NOT NULL);
+    INSERT INTO produits (nom, prix) VALUES
+      ('Casque audio', 59.90),
+      ('Clavier mécanique', 79.00),
+      ('Écran 27 pouces', 189.99),
+      ('Souris sans fil', 24.50);
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: database
+  namespace: boutique
+  labels:
+    app: database
+  annotations:
+    # Exceptions Checkov justifiées (voir NOTE_SYNTHESE.md, risques résiduels)
+    checkov.io/skip1: CKV_K8S_43=Labo minikube sans registre ; en production l'image sera référencée par digest depuis Azure Container Registry
+    checkov.io/skip2: CKV_K8S_15=Labo minikube sans registre ; images chargées localement, imagePullPolicy Always impossible
+spec:
+  serviceName: database
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      serviceAccountName: boutique-app
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10070
+        runAsGroup: 10070
+        fsGroup: 10070
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_DB
+              value: boutique
+            - name: POSTGRES_USER_FILE
+              value: /var/run/secrets/db/username
+            - name: POSTGRES_PASSWORD_FILE
+              value: /var/run/secrets/db/password
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-h", "127.0.0.1", "-p", "5432", "-U", "boutique"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-h", "127.0.0.1", "-p", "5432", "-U", "boutique"]
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          volumeMounts:
+            - name: donnees
+              mountPath: /var/lib/postgresql/data
+            - name: socket
+              mountPath: /var/run/postgresql
+            - name: tmp
+              mountPath: /tmp
+            - name: db-credentials
+              mountPath: /var/run/secrets/db
+              readOnly: true
+            - name: db-init
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+      volumes:
+        - name: donnees
+          emptyDir: {}
+        - name: socket
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: db-credentials
+          secret:
+            secretName: db-credentials
+            defaultMode: 0440
+        - name: db-init
+          configMap:
+            name: db-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database
+  namespace: boutique
+spec:
+  selector:
+    app: database
+  ports:
+    - port: 5432
+      targetPort: postgres

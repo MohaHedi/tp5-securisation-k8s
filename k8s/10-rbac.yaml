@@ -1,0 +1,54 @@
+# RBAC : moindre privilège
+#
+# 1) "deployeur" : le compte utilisé pour déployer l'application (par exemple par le pipeline).
+#    Il peut gérer les Deployments et Services de SON namespace, lire les Pods et leurs logs.
+#    Il ne peut PAS lire les Secrets, ni entrer dans un Pod (exec), ni toucher aux autres namespaces.
+#
+# 2) "boutique-app" : l'identité des Pods de l'application.
+#    Aucun droit sur l'API Kubernetes, et son jeton n'est même pas monté dans les Pods.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: deployeur
+  namespace: boutique
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: deployeur-boutique
+  namespace: boutique
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "replicasets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["services", "configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: deployeur-boutique
+  namespace: boutique
+subjects:
+  - kind: ServiceAccount
+    name: deployeur
+    namespace: boutique
+roleRef:
+  kind: Role
+  name: deployeur-boutique
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: boutique-app
+  namespace: boutique
+automountServiceAccountToken: false

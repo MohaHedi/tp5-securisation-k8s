@@ -1,0 +1,14 @@
+# TEST : un Pod qui tourne en root (utilisateur 0).
+# Résultat attendu dans le namespace boutique : REFUSÉ par les Pod Security Standards.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-root
+  namespace: boutique
+spec:
+  containers:
+    - name: pirate
+      image: busybox:1.37
+      command: ["sleep", "3600"]
+      securityContext:
+        runAsUser: 0

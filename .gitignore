@@ -1,0 +1,21 @@
+# Terraform : le state et les variables locales contiennent des informations sensibles
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+.terraform.lock.hcl.bak
+
+# Secrets locaux : jamais dans Git
+.env
+*.env
+secrets/
+cluster/encryption-config.yaml
+
+# Divers
+__pycache__/
+*.pyc
+
+# Rapports Trivy complets trop volumineux pour Git (le résumé est versionné)
+rapports/avant/trivy-backend.json

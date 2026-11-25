@@ -1,0 +1,38 @@
+terraform scan results:
+
+Passed checks: 9, Failed checks: 11, Skipped checks: 0
+
+Check: CKV_AZURE_160: "Ensure that HTTP (port 80) access is restricted from the internet"
+	FAILED for resource: azurerm_network_security_group.web
+	File: /main.tf:42-70
+Check: CKV_AZURE_10: "Ensure that SSH access is restricted from the internet"
+	FAILED for resource: azurerm_network_security_group.web
+	File: /main.tf:42-70
+Check: CKV_AZURE_178: "Ensure linux VM enables SSH with keys for secure communication"
+	FAILED for resource: azurerm_linux_virtual_machine.admin
+	File: /main.tf:98-119
+Check: CKV_AZURE_149: "Ensure that Virtual machine does not enable password authentication"
+	FAILED for resource: azurerm_linux_virtual_machine.admin
+	File: /main.tf:98-119
+Check: CKV_AZURE_1: "Ensure Azure Instance does not use basic authentication(Use SSH Key Instead)"
+	FAILED for resource: azurerm_linux_virtual_machine.admin
+	File: /main.tf:98-119
+Check: CKV_AZURE_50: "Ensure Virtual Machine Extensions are not Installed"
+	FAILED for resource: azurerm_linux_virtual_machine.admin
+	File: /main.tf:98-119
+Check: CKV_AZURE_178: "Ensure linux VM enables SSH with keys for secure communication"
+	FAILED for resource: azurerm_linux_virtual_machine_scale_set.web
+	File: /main.tf:121-153
+Check: CKV_AZURE_149: "Ensure that Virtual machine does not enable password authentication"
+	FAILED for resource: azurerm_linux_virtual_machine_scale_set.web
+	File: /main.tf:121-153
+Check: CKV_AZURE_97: "Ensure that Virtual machine scale sets have encryption at host enabled"
+	FAILED for resource: azurerm_linux_virtual_machine_scale_set.web
+	File: /main.tf:121-153
+Check: CKV_AZURE_49: "Ensure Azure linux scale set does not use basic authentication(Use SSH Key Instead)"
+	FAILED for resource: azurerm_linux_virtual_machine_scale_set.web
+	File: /main.tf:121-153
+Check: CKV_AZURE_119: "Ensure that Network Interfaces don't use public IPs"
+	FAILED for resource: azurerm_network_interface.admin
+	File: /main.tf:85-96
+

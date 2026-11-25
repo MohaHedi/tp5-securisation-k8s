@@ -1,0 +1,11 @@
+dockerfile scan results:
+
+Passed checks: 45, Failed checks: 2, Skipped checks: 0
+
+Check: CKV_DOCKER_2: "Ensure that HEALTHCHECK instructions have been added to container images"
+	FAILED for resource: avant/backend/Dockerfile.
+	File: avant/backend/Dockerfile:1-12
+Check: CKV_DOCKER_3: "Ensure that a user for the container has been created"
+	FAILED for resource: avant/backend/Dockerfile.
+	File: avant/backend/Dockerfile:1-12
+
