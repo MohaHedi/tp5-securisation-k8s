@@ -28,6 +28,11 @@ write_files:
   - path: /etc/docker/daemon.json
     content: |
       {"registry-mirrors": ["https://mirror.gcr.io"]}
+  - path: /etc/ssh/sshd_config.d/10-tp5-port443.conf
+    content: |
+      # SSH aussi sur le port 443, que les reseaux d'ecole bloquent rarement
+      Port 22
+      Port 443
   - path: /var/lib/tp5/projet.tar.xz
     encoding: b64
     content: $(base64 -w0 "$TMP/projet.tar.xz")
@@ -49,10 +54,10 @@ echo "    configuration : $taille octets encodés (limite Azure : 65 536)"
 echo "2/5 Groupe de ressources $RG ($REGION)"
 az group create -n "$RG" -l "$REGION" -o none
 
-echo "3/5 Pare-feu : SSH (22), site (8080) et rapport (8081) ouverts UNIQUEMENT pour $IP_ADMIN"
+echo "3/5 Pare-feu : SSH (22 et 443), site (8080) et rapport (8081) ouverts UNIQUEMENT pour $IP_ADMIN"
 az network nsg create -g "$RG" -n "$VM-nsg" -o none
 az network nsg rule create -g "$RG" --nsg-name "$VM-nsg" -n autoriser-poste-admin --priority 100 \
-  --source-address-prefixes "$IP_ADMIN" --destination-port-ranges 22 8080 8081 --protocol Tcp --access Allow -o none
+  --source-address-prefixes "$IP_ADMIN" --destination-port-ranges 22 443 8080 8081 --protocol Tcp --access Allow -o none
 
 echo "4/5 VM $TAILLE Ubuntu 24.04 : clé SSH seulement, disques chiffrés sur l'hôte, démarrage sécurisé (10 min de création, puis 30 à 50 min de montage du labo)"
 az vm create -g "$RG" -n "$VM" --image Canonical:ubuntu-24_04-lts:server:latest --size "$TAILLE" \
